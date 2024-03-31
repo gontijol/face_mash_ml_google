@@ -307,6 +307,5 @@ class _GalleryViewState extends State<GalleryView> {
     } else {
       print('No face detected in the captured image.');
     }
-    widget.onImage(inputImage);
   }
 }
