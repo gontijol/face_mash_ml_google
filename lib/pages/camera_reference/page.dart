@@ -17,6 +17,7 @@ class CameraPreviewPage extends GetView<FaceController> {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
+          // ignore: unnecessary_null_comparison
           controller.cameraController.value != null
               ? Padding(
                   padding: const EdgeInsets.only(bottom: 40.0),

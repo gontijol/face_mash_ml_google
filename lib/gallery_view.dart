@@ -4,10 +4,10 @@ import 'dart:io';
 import 'package:face_detection/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 import 'package:google_mlkit_face_mesh_detection/google_mlkit_face_mesh_detection.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:image/image.dart' as img;
 
 class GalleryView extends StatefulWidget {
   const GalleryView(
@@ -56,10 +56,8 @@ class _GalleryViewState extends State<GalleryView> {
     final List<FaceMesh> meshes = await _meshDetector.processImage(inputImage);
 
     ltrb = meshes.first.boundingBox;
-    print('Bounding Box: $ltrb');
     if (meshes.isNotEmpty) {
       referenceFacePoints = meshes.first.points.map((point) {
-        print('Point: ${point.x}, ${point.y}, ${point.z}');
         return FaceMeshPoint(
           index: point.index,
           x: point.x,
@@ -169,19 +167,12 @@ class _GalleryViewState extends State<GalleryView> {
     final double ltrbDiffLeft = ltrbDifference.left - ltrb.left;
     final double ltrbDiffRight = ltrbDifference.right - ltrb.right;
     final double ltrbDiffBottom = ltrbDifference.bottom - ltrb.bottom;
-    print(
-        'Calculate Box Difference: $ltrbDiffTop, $ltrbDiffLeft, $ltrbDiffRight, $ltrbDiffBottom');
     final calculateLtrbDifference =
         (ltrbDiffTop + ltrbDiffLeft + ltrbDiffRight + ltrbDiffBottom) / 3170;
 
     if (calculateLtrbDifference > 0.95 && calculateLtrbDifference <= 1.05) {
-      print('Match: Face detected matches reference image.');
-    } else {
-      print('No Match: Face detected does not match reference image.');
-    }
+    } else {}
 
-    print(
-        'Calculate LTRB Difference: ${double.parse(calculateLtrbDifference.toStringAsFixed(2)).clamp(0.0, 100) * 100}%');
     for (int i = 0; i < capturedFacePoints.length; i++) {
       final double xDiff = capturedFacePoints[i].x - referenceFacePoints[i].x;
       final double yDiff = capturedFacePoints[i].y - referenceFacePoints[i].y;
@@ -219,7 +210,7 @@ class _GalleryViewState extends State<GalleryView> {
         .toList();
 
     showDialog(
-        context: context,
+        context: context.mounted ? context : Get.context!,
         builder: (BuildContext context) {
           return Dialog(
             shape: RoundedRectangleBorder(
@@ -266,12 +257,8 @@ class _GalleryViewState extends State<GalleryView> {
 
   compareFaces(List<FaceMeshPoint> detectedPoints, Rect detectedLtrb) {
     final double similarity = calculateSimilarity(detectedPoints, detectedLtrb);
-    print('Similarity: $similarity');
     if (similarity >= 90) {
-      print('Match: Face detected matches reference image. ');
-    } else {
-      print('No Match: Face detected does not match reference image.');
-    }
+    } else {}
     setState(() {
       _result = similarity;
     });
@@ -289,7 +276,6 @@ class _GalleryViewState extends State<GalleryView> {
       var captureLtrb = meshes.first.boundingBox;
       if (meshes.isNotEmpty) {
         capturedFacePoints = meshes.first.points.map((point) {
-          print('Point: ${point.x}, ${point.y}, ${point.z}');
           return FaceMeshPoint(
             index: point.index,
             x: point.x,
@@ -303,9 +289,6 @@ class _GalleryViewState extends State<GalleryView> {
       Future.delayed(const Duration(seconds: 3), () {
         compareFaces(capturedFacePoints, captureLtrb);
       });
-      print('Face detected in the captured image.');
-    } else {
-      print('No face detected in the captured image.');
-    }
+    } else {}
   }
 }

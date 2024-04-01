@@ -1,11 +1,11 @@
 import 'dart:io';
 import 'dart:math';
 import 'package:camera/camera.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:google_mlkit_face_mesh_detection/google_mlkit_face_mesh_detection.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:path_provider/path_provider.dart';
 
 class FaceController extends GetxController {
   late CameraController cameraController;
@@ -142,10 +142,7 @@ class FaceController extends GetxController {
     final double similarity = calculateSimilarity(detectedPoints, detectedLtrb);
 
     if (similarity >= 90) {
-      print('Match: Face detected matches reference image. ');
-    } else {
-      print('No Match: Face detected does not match reference image.');
-    }
+    } else {}
 
     result.value = similarity;
   }
@@ -174,10 +171,7 @@ class FaceController extends GetxController {
       Future.delayed(const Duration(seconds: 3), () {
         compareFaces(capturedFacePoints, captureLtrb);
       });
-      print('Face detected in the captured image.');
-    } else {
-      print('No face detected in the captured image.');
-    }
+    } else {}
   }
 
   Future getImage(ImageSource source) async {
@@ -189,7 +183,9 @@ class FaceController extends GetxController {
     try {
       await _processFile(pickedFile.path);
     } catch (e) {
-      print(e);
+      if (kDebugMode) {
+        print(e);
+      }
     }
     Future.delayed(const Duration(seconds: 3), () {});
     // InputImage.fromFilePath(pickedFile.path);
@@ -206,7 +202,6 @@ class FaceController extends GetxController {
     ltrb = meshes.first.boundingBox;
     if (meshes.isNotEmpty) {
       referenceFacePoints.value = meshes.first.points.map((point) {
-        print('Point: ${point.x}, ${point.y}, ${point.z}');
         return FaceMeshPoint(
           index: point.index,
           x: point.x,
@@ -214,8 +209,6 @@ class FaceController extends GetxController {
           z: point.z,
         );
       }).toList();
-      print('Face detected in the reference image.');
-      print('Bounding Box: $ltrb');
     } else {
       throw Exception('No face detected in the reference image.');
     }
