@@ -35,23 +35,31 @@ class FaceController extends GetxController {
   }
 
   takeAndProcessPicture() async {
-    final XFile picture = await cameraController.takePicture();
-    final inputImage = InputImage.fromFilePath(picture.path);
+    try {
+      final XFile picture = await cameraController.takePicture();
+      final inputImage = InputImage.fromFilePath(picture.path);
 
-    final List<FaceMesh> meshes = await _meshDetector.processImage(inputImage);
+      final List<FaceMesh> meshes =
+          await _meshDetector.processImage(inputImage);
 
-    ltrb = meshes.first.boundingBox;
-    if (meshes.isNotEmpty) {
-      referenceFacePoints.value = meshes.first.points.map((point) {
-        return FaceMeshPoint(
-          index: point.index,
-          x: point.x,
-          y: point.y,
-          z: point.z,
-        );
-      }).toList();
-    } else {
-      throw Exception('No face detected in the reference image.');
+      ltrb = meshes.first.boundingBox;
+      if (meshes.isNotEmpty) {
+        referenceFacePoints.value = meshes.first.points.map((point) {
+          return FaceMeshPoint(
+            index: point.index,
+            x: point.x,
+            y: point.y,
+            z: point.z,
+          );
+        }).toList();
+      } else {
+        throw Exception('No face detected in the reference image.');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        Get.back();
+        print(e);
+      }
     }
     Future.delayed(const Duration(seconds: 3), () {});
   }

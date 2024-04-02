@@ -1,7 +1,7 @@
 import 'package:face_detection/pages/camera_compare/page.dart';
 import 'package:face_detection/pages/camera_reference/page.dart';
-import 'package:face_detection/pages/gallery/bindings.dart';
-import 'package:face_detection/pages/gallery/page.dart';
+import 'package:face_detection/pages/home/bindings.dart';
+import 'package:face_detection/pages/home/page.dart';
 import 'package:face_detection/routes/app_routes.dart';
 import 'package:get/route_manager.dart';
 

@@ -72,9 +72,13 @@ class PickImageFilePage extends GetView<FaceController> {
                   'Similaridade com a imagem de referência: ${controller.result.value.toStringAsFixed(2)}%'),
             ),
           ),
-          controller.result.value >= 80.0
-              ? const Icon(Icons.check_box, size: 40, color: Colors.green)
-              : const Icon(Icons.dangerous, size: 40, color: Colors.red),
+          Obx(
+            () => controller.result.value >= 80.0
+                ? const Icon(Icons.check_box, size: 40, color: Colors.green)
+                : controller.result.value >= 0.01
+                    ? const Icon(Icons.dangerous, size: 40, color: Colors.red)
+                    : const SizedBox(),
+          ),
         ],
       ),
     );
