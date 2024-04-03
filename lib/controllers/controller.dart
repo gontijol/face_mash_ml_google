@@ -17,6 +17,7 @@ class FaceController extends GetxController {
   late RxList referenceFacePoints = [].obs;
   final result = 0.0.obs;
   late Rect ltrb;
+  final isLoadingCamera = false.obs;
 
   @override
   onInit() async {
@@ -26,12 +27,33 @@ class FaceController extends GetxController {
   }
 
   initializeCamera() async {
+    isLoadingCamera.value = true;
     final cameras = await availableCameras();
     cameraController = CameraController(
       cameras[1],
       ResolutionPreset.high,
     );
     await cameraController.initialize();
+    isLoadingCamera.value = false;
+  }
+
+  changeCamera() async {
+    isLoadingCamera.value = true;
+    cameraController.dispose();
+    if (cameraController.description.lensDirection ==
+        CameraLensDirection.front) {
+      cameraController = CameraController(
+        await availableCameras().then((value) => value[0]),
+        ResolutionPreset.high,
+      );
+    } else {
+      cameraController = CameraController(
+        await availableCameras().then((value) => value[1]),
+        ResolutionPreset.high,
+      );
+    }
+    await cameraController.initialize();
+    isLoadingCamera.value = false;
   }
 
   takeAndProcessPicture() async {
@@ -100,8 +122,8 @@ class FaceController extends GetxController {
   double calculateSimilarity(
       List<FaceMeshPoint> capturedFacePoints, Rect ltrbDifference) {
     // Defina pesos para diferentes componentes
-    const double pointsWeight = 0.3;
-    const double ltrbWeight = 0.7;
+    const double pointsWeight = 0.8;
+    const double ltrbWeight = 0.2;
 
     // Inicialize as diferenças
     double pointsDifference = 0.0;
@@ -109,20 +131,20 @@ class FaceController extends GetxController {
 
     // Calcular a diferença na localização dos pontos
     for (int i = 0; i < capturedFacePoints.length; i++) {
-      pointsDifference += sqrt(
-          pow(capturedFacePoints[i].x - referenceFacePoints[i].x, 2) +
-              pow(capturedFacePoints[i].y - referenceFacePoints[i].y, 2) +
-              pow(capturedFacePoints[i].z - referenceFacePoints[i].z, 2));
+      pointsDifference +=
+          sqrt(pow(capturedFacePoints[i].x - referenceFacePoints[i].x, 2)) +
+              sqrt(pow(capturedFacePoints[i].y - referenceFacePoints[i].y, 2)) +
+              sqrt(pow(capturedFacePoints[i].z - referenceFacePoints[i].z, 2));
     }
 
     // Normalizar a diferença na localização dos pontos
     pointsDifference /= capturedFacePoints.length;
 
     // Calcular a diferença nas dimensões do retângulo delimitador
-    double ltrbDiffTop = sqrt(pow(ltrbDifference.top - ltrb.top, 2));
-    double ltrbDiffLeft = sqrt(pow(ltrbDifference.left - ltrb.left, 2));
-    double ltrbDiffRight = sqrt(pow(ltrbDifference.right - ltrb.right, 2));
-    double ltrbDiffBottom = sqrt(pow(ltrbDifference.bottom - ltrb.bottom, 2));
+    double ltrbDiffTop = ltrbDifference.top - ltrb.top;
+    double ltrbDiffLeft = ltrbDifference.left - ltrb.left;
+    double ltrbDiffRight = ltrbDifference.right - ltrb.right;
+    double ltrbDiffBottom = ltrbDifference.bottom - ltrb.bottom;
 
     double maxLTRBDifference =
         max(max(ltrbDiffTop, ltrbDiffLeft), max(ltrbDiffRight, ltrbDiffBottom));
@@ -135,7 +157,7 @@ class FaceController extends GetxController {
         (pointsWeight * pointsDifference + ltrbWeight * ltrbDiff);
 
     // Normalizar a similaridade para uma escala de 0 a 100
-    double maxPointsDifference = 100.0;
+    double maxPointsDifference = 15.0;
 
     similarity =
         (1 - (similarity / (maxPointsDifference + maxLTRBDifference))) * 100;
