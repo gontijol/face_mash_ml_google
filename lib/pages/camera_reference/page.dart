@@ -17,64 +17,83 @@ class CameraPreviewPage extends GetView<FaceController> {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          // ignore: unnecessary_null_comparison
-          controller.cameraController.value != null
-              ? Padding(
-                  padding: const EdgeInsets.only(bottom: 40.0),
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      CameraPreview(
-                        controller.cameraController,
-                        child: Positioned.fill(
-                          child: GestureDetector(
-                            onTapDown: (details) {
-                              // Adicione aqui a lógica para processar o toque
-                              // e mover o pintor para a posição do toque
-                            },
-                            child: Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                const Text('Ajuste o rosto na área delimitada',
-                                    style: TextStyle(
-                                        color: Colors.white, fontSize: 20)),
-                                CustomPaint(
-                                  painter: RealisticFacePainter(),
-                                ),
-                              ],
+          Obx(
+            () => !controller.isLoadingCamera.value
+                ? Padding(
+                    padding: const EdgeInsets.only(bottom: 0.0),
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        CameraPreview(
+                          controller.cameraController,
+                          child: Positioned.fill(
+                            child: GestureDetector(
+                              onTapDown: (details) {
+                                // Adicione aqui a lógica para processar o toque
+                                // e mover o pintor para a posição do toque
+                              },
+                              child: Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  const Text(
+                                      'Ajuste o rosto na área delimitada',
+                                      style: TextStyle(
+                                          color: Colors.white, fontSize: 20)),
+                                  CustomPaint(
+                                    painter: RealisticFacePainter(),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      Positioned(
-                        bottom: 20,
-                        child: ElevatedButton(
-                          style: ButtonStyle(
-                            backgroundColor: MaterialStateProperty.all(
-                              Colors.white,
-                            ),
-                            shadowColor: MaterialStateProperty.all(
-                              Colors.blue,
-                            ),
-                          ),
-                          onPressed: () async {
-                            context.loaderOverlay.show();
-                            await controller.takeAndProcessPicture();
-                            Future.delayed(const Duration(seconds: 3), () {
-                              context.loaderOverlay.hide();
-                              Get.back();
-                            });
-                          },
-                          child: const Padding(
-                            padding: EdgeInsets.all(20.0),
-                            child: Icon(Icons.camera_alt, color: Colors.blue),
-                          ),
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
+                  )
+                : const CircularProgressIndicator(),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              ElevatedButton(
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all(
+                    Colors.white,
                   ),
-                )
-              : const CircularProgressIndicator(),
+                  shadowColor: MaterialStateProperty.all(
+                    Colors.blue,
+                  ),
+                ),
+                onPressed: () async {
+                  context.loaderOverlay.show();
+                  await controller.takeAndProcessPicture();
+                  Future.delayed(const Duration(seconds: 3), () {
+                    context.loaderOverlay.hide();
+                    Get.back();
+                  });
+                },
+                child: const Padding(
+                  padding: EdgeInsets.all(20.0),
+                  child: Icon(Icons.camera_alt, color: Colors.blue),
+                ),
+              ),
+              ElevatedButton(
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all(
+                    Colors.white,
+                  ),
+                  shadowColor: MaterialStateProperty.all(
+                    Colors.blue,
+                  ),
+                ),
+                onPressed: () async => controller.changeCamera(),
+                child: const Padding(
+                  padding: EdgeInsets.all(20.0),
+                  child: Icon(Icons.cameraswitch, color: Colors.blue),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
